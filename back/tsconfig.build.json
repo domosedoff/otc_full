@@ -1,0 +1,9 @@
+// backend/tsconfig.build.json
+{
+  "extends": "./tsconfig.json", // Наследует все настройки из tsconfig.json
+  "compilerOptions": {
+    "outDir": "./build", // Убедись, что это соответствует outDir в tsconfig.json
+    "rootDir": "./" // <-- ИСПРАВЛЕНИЕ ЗДЕСЬ: меняем на корень проекта
+  }
+  // include и exclude наследуются из tsconfig.json, если не переопределены
+}

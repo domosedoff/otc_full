@@ -1,0 +1,29 @@
+// backend/tsconfig.json
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./build",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@app/*": ["src/*"]
+    },
+    "rootDir": "./", // <-- ИСПРАВЛЕНИЕ ЗДЕСЬ: меняем на корень проекта
+    "sourceRoot": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "build", "test"]
+}
