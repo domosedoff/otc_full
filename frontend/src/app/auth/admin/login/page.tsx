@@ -1,22 +1,15 @@
-// frontend/src/app/auth/admin/login/page.tsx
+// frontend/src/app/auth/login/page.tsx
 "use client";
 
-import React, { useState } from "react"; // <-- ИСПРАВЛЕНИЕ: 'from' вместо '=>'
-import {
-  Input,
-  Button,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-} from "@heroui/react";
+import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api, { setAuthToken } from "@/lib/api";
-import { LoginAdminPayload, AdminAuthResponse } from "@/types/auth";
+import { LoginEmitterPayload, EmitterAuthResponse } from "@/types/auth";
 import axios from "axios";
 
-export default function AdminLoginPage() {
-  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,26 +21,19 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const payload: LoginAdminPayload = { password };
-
-      if (usernameOrEmail.includes("@")) {
-        payload.email = usernameOrEmail;
-      } else {
-        payload.username = usernameOrEmail;
-      }
-
-      const response = await api.post<AdminAuthResponse>(
-        "/auth/admin/login",
+      const payload: LoginEmitterPayload = { email, password };
+      const response = await api.post<EmitterAuthResponse>(
+        "/auth/emitter/login",
         payload
       );
 
       sessionStorage.setItem("accessToken", response.data.accessToken);
-      sessionStorage.setItem("userRole", "admin");
+      sessionStorage.setItem("userRole", "emitter");
       setAuthToken(response.data.accessToken);
 
-      router.push("/admin");
+      router.push("/profile/emitter");
     } catch (err: unknown) {
-      console.error("Admin login error:", err);
+      console.error("Login error:", err);
       if (
         axios.isAxiosError(err) &&
         err.response &&
@@ -55,12 +41,7 @@ export default function AdminLoginPage() {
         typeof err.response.data === "object" &&
         "message" in err.response.data
       ) {
-        const errorMessage = (
-          err.response.data as { message: string | string[] }
-        ).message;
-        setError(
-          Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage
-        );
+        setError((err.response.data as { message: string }).message);
       } else {
         setError("Произошла ошибка при входе. Пожалуйста, попробуйте позже.");
       }
@@ -70,44 +51,76 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <Card className="max-w-md w-full">
-        <CardHeader className="flex justify-center">
-          <h1 className="text-2xl font-bold">Вход для Администраторов</h1>
-        </CardHeader>
-        <CardBody>
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <Input
-              isRequired
-              label="Имя пользователя или Email"
-              placeholder="Введите имя пользователя или email"
-              type="text"
-              value={usernameOrEmail}
-              onValueChange={setUsernameOrEmail}
-              isInvalid={!!error}
-              errorMessage={error}
+    <section className="flex flex-col items-center justify-center min-h-[calc(100vh-128px)] py-8 md:py-10">
+      {" "}
+      {/* 128px = ~ header + footer height */}
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center text-gray-900">
+          Вход для Эмитентов
+        </h1>
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="you@example.com"
             />
-            <Input
-              isRequired
-              label="Пароль"
-              placeholder="Введите ваш пароль"
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Пароль
+            </label>
+            <input
+              id="password"
+              name="password"
               type="password"
+              autoComplete="current-password"
+              required
               value={password}
-              onValueChange={setPassword}
-              isInvalid={!!error}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Ваш пароль"
             />
-            {error && <p className="text-danger text-sm">{error}</p>}
-            <Button type="submit" color="primary" isLoading={loading}>
-              Войти
-            </Button>
-          </form>
-        </CardBody>
-        <CardFooter className="flex justify-center">
-          <p className="text-small text-default-500">
-            Только для авторизованных администраторов.
-          </p>
-        </CardFooter>
-      </Card>
+          </div>
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {loading ? "Вход..." : "Войти"}
+            </button>
+          </div>
+        </form>
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Нет аккаунта?{" "}
+          <Link
+            href="/auth/register"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
+            Зарегистрироваться
+          </Link>
+        </p>
+      </div>
     </section>
   );
 }

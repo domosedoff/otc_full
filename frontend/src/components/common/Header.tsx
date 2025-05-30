@@ -2,59 +2,59 @@
 "use client";
 
 import React from "react";
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  Link,
-  Button,
-} from "@heroui/react";
-// import Image from 'next/image'; // <-- УБРАН ИМПОРТ Image
+import Link from "next/link";
+// import { useRouter } from 'next/navigation'; // <-- ИСПРАВЛЕНИЕ: Убран импорт useRouter
 
 export function Header() {
+  // const router = useRouter(); // <-- ИСПРАВЛЕНИЕ: Убрана инициализация router
+  const isLoggedIn = false; // Заглушка, позже будем брать из состояния
+  const userName = "Имя Эмитента"; // Заглушка
+
+  const handleLogout = () => {
+    alert("Выход из системы");
+  };
+
   return (
-    <Navbar shouldHideOnScroll>
-      <NavbarBrand>
-        {/* <Image // <-- УБРАН БЛОК Image
-          src="/logo.svg"
-          alt="OTC Marketplace Logo"
-          width={30}
-          height={30}
-        />
-        <p className="font-bold text-inherit ml-2">OTC Marketplace</p> */}
-        <p className="font-bold text-inherit">OTC Marketplace</p>{" "}
-        {/* <-- ОСТАВЛЯЕМ ТОЛЬКО ТЕКСТ */}
-      </NavbarBrand>
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <NavbarItem>
-          <Link color="foreground" href="/">
+    <header className="bg-gray-100 shadow-md">
+      <nav className="container mx-auto max-w-7xl px-6 py-3 flex justify-between items-center">
+        <Link href="/" className="text-xl font-bold text-gray-800">
+          OTC Marketplace
+        </Link>
+        <div className="hidden sm:flex space-x-4">
+          <Link href="/" className="text-gray-600 hover:text-blue-600">
             Главная
           </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="/screener">
+          <Link href="/screener" className="text-gray-600 hover:text-blue-600">
             Скринер
           </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="/about">
+          <Link href="/about" className="text-gray-600 hover:text-blue-600">
             О сервисе
           </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="/info">
+          <Link href="/info" className="text-gray-600 hover:text-blue-600">
             Полезная инфа
           </Link>
-        </NavbarItem>
-      </NavbarContent>
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Button as={Link} color="primary" href="/auth/login" variant="flat">
-            Я эмитент
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-    </Navbar>
+        </div>
+        <div className="flex items-center space-x-4">
+          {isLoggedIn ? (
+            <>
+              <span className="text-gray-700">{userName}</span>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Выход
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Я эмитент
+            </Link>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 }

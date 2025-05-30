@@ -9,9 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@heroui/react": "^2.7.8",
+    "@headlessui/react": "^2.2.4",
     "axios": "^1.9.0",
-    "framer-motion": "^12.15.0",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -27,5 +26,10 @@
     "postcss": "^8.4.31",
     "tailwindcss": "^3.4.3",
     "typescript": "^5"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "tailwind.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

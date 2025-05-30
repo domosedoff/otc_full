@@ -2,9 +2,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./providers";
-import { Header } from "../components/common/Header"; // <-- НОВЫЙ ИМПОРТ
-import { Footer } from "../components/common/Footer"; // <-- НОВЫЙ ИМПОРТ
+import { Header } from "../components/common/Header";
+import { Footer } from "../components/common/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,19 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className={inter.className}>
-        <Providers>
-          <div className="relative flex flex-col h-screen">
-            {" "}
-            {/* Обертка для sticky footer */}
-            <Header /> {/* <-- ДОБАВЛЕНО */}
-            <main className="container mx-auto max-w-7xl flex-grow px-6">
-              {" "}
-              {/* Основное содержимое */}
-              {children}
-            </main>
-            <Footer /> {/* <-- ДОБАВЛЕНО */}
-          </div>
-        </Providers>
+        <div className="relative flex flex-col h-screen">
+          <Header />
+          <main className="container mx-auto max-w-7xl flex-grow px-6">
+            {children}
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
