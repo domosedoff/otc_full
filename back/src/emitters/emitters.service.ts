@@ -1,5 +1,5 @@
-// backend/src/emitters/emitters.service.ts
-import { Injectable, BadRequestException } from '@nestjs/common'; // Убраны NotFoundException, BadRequestException, если не используются
+// back/src/emitters/emitters.service.ts
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Emitter } from './entities/emitter.entity';
@@ -10,7 +10,7 @@ import { PublicEmitterSummary } from './dto/public-emitters-list.dto';
 import { PublicEmitterDetailsDto } from './dto/public-emitter-details.dto';
 import { SubscribesService } from '../subscribes/subscribes.service';
 import { EmitterProfileDto } from './dto/emitter-profile.dto';
-import { differenceInDays, isAfter, isSameDay } from 'date-fns'; // <-- ИСПРАВЛЕНИЕ: Добавлены isAfter, isSameDay
+import { differenceInDays, isAfter, isSameDay } from 'date-fns';
 
 @Injectable()
 export class EmittersService {
@@ -183,7 +183,7 @@ export class EmittersService {
         has_dividends,
       });
     }
-    if (rating) {
+    if (rating !== undefined) {
       queryBuilder.andWhere('financialData.rating = :rating', { rating });
     }
 
@@ -222,7 +222,7 @@ export class EmittersService {
       stock_price: emitter.financialData?.stock_price,
       trading_volume: emitter.financialData?.trading_volume,
       has_dividends: emitter.financialData?.has_dividends,
-      rating: emitter.financialData?.rating,
+      rating: emitter.financialData?.rating, // Теперь это string
       company_status: emitter.financialData?.company_status,
     }));
 
@@ -265,7 +265,7 @@ export class EmittersService {
       stock_price: emitter.financialData?.stock_price,
       trading_volume: emitter.financialData?.trading_volume,
       has_dividends: emitter.financialData?.has_dividends,
-      rating: emitter.financialData?.rating,
+      rating: emitter.financialData?.rating, // Теперь это string
       company_status: emitter.financialData?.company_status,
     };
 
@@ -318,7 +318,7 @@ export class EmittersService {
             is_active:
               currentSubscription.payment_status === 'active' &&
               (isAfter(currentSubscription.end_date, today) ||
-                isSameDay(currentSubscription.end_date, today)), // <-- ИСПРАВЛЕНИЕ ЗДЕСЬ
+                isSameDay(currentSubscription.end_date, today)),
           }
         : undefined,
       analitics: emitter.analitics

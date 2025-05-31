@@ -1,42 +1,66 @@
-// backend/src/emitters/dto/public-emitter-details.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
-import { Emitter } from '../entities/emitter.entity';
-// import { FinancialData } from '../../financial-data/entities/financial-data.entity'; // <-- Убран импорт FinancialData
+// back/src/emitters/dto/public-emitter-details.dto.ts
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  IsUUID,
+} from 'class-validator';
 
-// Вспомогательный тип для платформ (если будет использоваться)
-class PlatformInfo {
-  @ApiProperty({ example: 'Биржа X', description: 'Название платформы' })
+// Этот DTO используется для вложенного объекта emitter в PublicEmitterDetailsDto
+export class PublicEmitterDetailsData {
+  @IsUUID()
+  @IsString()
+  emitent_id: string;
+
+  @IsString()
   name: string;
 
-  @ApiProperty({
-    example: 'https://birzha-x.com/company-page',
-    description: 'URL страницы компании на платформе',
-  })
-  url: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  logo_url?: string;
+
+  @IsOptional()
+  @IsString()
+  ticker?: string;
+
+  @IsOptional()
+  @IsString()
+  market?: string;
+
+  @IsOptional()
+  @IsString()
+  industry?: string;
+
+  @IsOptional()
+  @IsNumber()
+  market_cap?: number;
+
+  @IsOptional()
+  @IsNumber()
+  stock_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  trading_volume?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  has_dividends?: boolean;
+
+  @IsOptional()
+  @IsString() // ИСПРАВЛЕНИЕ: rating теперь string
+  rating?: string; // Изменено с number на string
+
+  @IsOptional()
+  @IsString()
+  company_status?: string;
 }
 
-// Определяем, какие поля Emitter будут видны публично в детальной карточке
-export type PublicEmitterDetails = Pick<
-  Emitter,
-  'emitent_id' | 'name' | 'description' | 'logo_url'
-> & {
-  // Поля из FinancialData
-  ticker?: string;
-  market?: string;
-  industry?: string;
-  market_cap?: number;
-  stock_price?: number;
-  trading_volume?: number;
-  has_dividends?: boolean;
-  rating?: string;
-  company_status?: string;
-  platforms?: PlatformInfo[];
-};
-
 export class PublicEmitterDetailsDto {
-  @ApiProperty({
-    type: () => Emitter,
-    description: 'Детальные данные эмитента',
-  })
-  emitter: PublicEmitterDetails;
+  emitter: PublicEmitterDetailsData;
 }

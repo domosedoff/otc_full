@@ -1,10 +1,10 @@
-// backend/src/subscribes/subscribes.service.ts
+// back/src/subscribes/subscribes.service.ts
 import {
   Injectable,
   NotFoundException,
   Inject,
   forwardRef,
-} from '@nestjs/common'; // <-- Убедись, что Inject и forwardRef импортированы
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subscribe } from './entities/subscribe.entity';
@@ -18,22 +18,24 @@ export class SubscribesService {
   constructor(
     @InjectRepository(Subscribe)
     private readonly subscribesRepository: Repository<Subscribe>,
-    @Inject(forwardRef(() => EmittersService)) // <-- ИСПРАВЛЕНИЕ: ДОБАВЛЕНО ЭТОТ ДЕКОРАТОР
+    @Inject(forwardRef(() => EmittersService))
     private readonly emittersService: EmittersService,
     private readonly paymentsService: PaymentsService,
   ) {}
 
-  private readonly COST_PER_DAY = 1.0;
-
   getTariffInfo(): {
+    id: string;
     name: string;
     description: string;
-    price_per_day: number;
+    price: number;
+    duration_days: number;
   } {
     return {
-      name: 'Размещение на платформе',
-      description: `Стоимость размещения составляет $${this.COST_PER_DAY.toFixed(2)} за один день.`,
-      price_per_day: this.COST_PER_DAY,
+      id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', // Фиксированный ID для единственного тарифа
+      name: 'Базовое размещение',
+      description: 'Размещение вашей компании на платформе.',
+      price: 100, // 100 руб. за день
+      duration_days: 1, // По умолчанию 1 день для отображения.
     };
   }
 
@@ -41,14 +43,19 @@ export class SubscribesService {
     emitentId: string,
     activateDto: ActivateSubscriptionDto,
   ): Promise<Subscribe> {
+    // --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Убрали 'tariffId' из деструктуризации ---
     const { duration_days } = activateDto;
-    const emitter = await this.emittersService.findById(emitentId);
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
+    const pricePerDay = 100; // Хардкодим цену за день для логики активации
+
+    const emitter = await this.emittersService.findById(emitentId);
     if (!emitter) {
       throw new NotFoundException('Эмитент не найден.');
     }
 
-    const amount = duration_days * this.COST_PER_DAY;
+    const amount = duration_days * pricePerDay;
+
     const today = new Date();
     let endDate = addDays(today, duration_days);
 

@@ -1,56 +1,33 @@
 // frontend/src/types/auth.ts
-// Соответствует RegisterEmitterDto на бэкенде
+
 export interface RegisterEmitterPayload {
   name: string;
   email: string;
   password: string;
-  inn?: string;
-  ogrn_ogrnip?: string;
-  legal_address?: string;
-  actual_address?: string;
-  phone?: string;
-  website?: string;
-  description?: string;
-  logo_url?: string;
+  inn: string; // Сделано обязательным
+  ogrn_ogrnip: string; // Сделано обязательным
+  legal_address: string; // Сделано обязательным
+  actual_address: string; // Сделано обязательным
+  phone: string; // Сделано обязательным
+  website?: string; // Остается необязательным
+  description: string; // Сделано обязательным
+  logo_url?: string; // Остается необязательным
 }
 
-// Соответствует LoginEmitterDto на бэкенде
-export interface LoginEmitterPayload {
-  email: string;
-  password: string;
-}
-
-// Соответствует LoginAdminDto на бэкенде
-export interface LoginAdminPayload {
-  username?: string;
-  email?: string;
-  password: string;
-}
-
-// Соответствует EmitterAuthResponseDto на бэкенде (частично)
 export interface EmitterAuthResponse {
-  message: string;
   accessToken: string;
   emitter: {
-    emitent_id: string;
+    id: string;
     name: string;
     email: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
+    status: "pending" | "approved" | "rejected";
   };
 }
 
-// Соответствует AdminAuthResponseDto на бэкенде (частично)
 export interface AdminAuthResponse {
-  message: string;
   accessToken: string;
   admin: {
-    admin_id: string;
+    id: string;
     username: string;
-    email?: string | null;
-    role: string;
-    created_at: string;
-    updated_at: string;
   };
 }

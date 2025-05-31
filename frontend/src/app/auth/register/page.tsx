@@ -13,6 +13,14 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
+    inn: "",
+    ogrn_ogrnip: "",
+    legal_address: "",
+    actual_address: "",
+    phone: "",
+    website: "",
+    description: "",
+    logo_url: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,11 +29,10 @@ export default function RegisterPage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    // <-- ИСПРАВЛЕНИЕ ЗДЕСЬ
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
@@ -34,16 +41,46 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
 
+    // --- НОВАЯ ВАЛИДАЦИЯ ---
+    const requiredFields: (keyof RegisterEmitterPayload)[] = [
+      "name",
+      "email",
+      "password",
+      "inn",
+      "ogrn_ogrnip",
+      "legal_address",
+      "actual_address",
+      "phone",
+      "description",
+    ];
+
+    for (const field of requiredFields) {
+      if (
+        !formData[field] ||
+        (typeof formData[field] === "string" &&
+          !(formData[field] as string).trim())
+      ) {
+        setError(
+          "Пожалуйста, заполните все обязательные поля, отмеченные звездочкой."
+        );
+        setLoading(false);
+        return; // Прерываем выполнение, если поле не заполнено
+      }
+    }
+    // --- КОНЕЦ НОВОЙ ВАЛИДАЦИИ ---
+
     try {
       const payload: RegisterEmitterPayload = {
-        ...formData,
-        inn: formData.inn || undefined,
-        ogrn_ogrnip: formData.ogrn_ogrnip || undefined,
-        legal_address: formData.legal_address || undefined,
-        actual_address: formData.actual_address || undefined,
-        phone: formData.phone || undefined,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        inn: formData.inn,
+        ogrn_ogrnip: formData.ogrn_ogrnip,
+        legal_address: formData.legal_address,
+        actual_address: formData.actual_address,
+        phone: formData.phone,
+        description: formData.description,
         website: formData.website || undefined,
-        description: formData.description || undefined,
         logo_url: formData.logo_url || undefined,
       };
 
@@ -90,6 +127,7 @@ export default function RegisterPage() {
         </h1>
         <form
           onSubmit={handleRegister}
+          noValidate
           className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4"
         >
           <div>
@@ -97,7 +135,7 @@ export default function RegisterPage() {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Название компании
+              Название компании<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="name"
@@ -107,6 +145,7 @@ export default function RegisterPage() {
               value={formData.name}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="organization"
             />
           </div>
           <div>
@@ -114,7 +153,7 @@ export default function RegisterPage() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email
+              Email<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="email"
@@ -124,6 +163,7 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="email"
             />
           </div>
           <div>
@@ -131,7 +171,7 @@ export default function RegisterPage() {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
             >
-              Пароль
+              Пароль<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="password"
@@ -141,6 +181,7 @@ export default function RegisterPage() {
               value={formData.password}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="new-password"
             />
           </div>
           <div>
@@ -148,15 +189,17 @@ export default function RegisterPage() {
               htmlFor="inn"
               className="block text-sm font-medium text-gray-700"
             >
-              ИНН
+              ИНН<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="inn"
               name="inn"
               type="text"
+              required
               value={formData.inn}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="off"
             />
           </div>
           <div>
@@ -164,15 +207,17 @@ export default function RegisterPage() {
               htmlFor="ogrn_ogrnip"
               className="block text-sm font-medium text-gray-700"
             >
-              ОГРН/ОГРНИП
+              ОГРН/ОГРНИП<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="ogrn_ogrnip"
               name="ogrn_ogrnip"
               type="text"
+              required
               value={formData.ogrn_ogrnip}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="off"
             />
           </div>
           <div>
@@ -180,15 +225,17 @@ export default function RegisterPage() {
               htmlFor="legal_address"
               className="block text-sm font-medium text-gray-700"
             >
-              Юридический адрес
+              Юридический адрес<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="legal_address"
               name="legal_address"
               type="text"
+              required
               value={formData.legal_address}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="street-address"
             />
           </div>
           <div>
@@ -196,15 +243,17 @@ export default function RegisterPage() {
               htmlFor="actual_address"
               className="block text-sm font-medium text-gray-700"
             >
-              Фактический адрес
+              Фактический адрес<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="actual_address"
               name="actual_address"
               type="text"
+              required
               value={formData.actual_address}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="street-address"
             />
           </div>
           <div>
@@ -212,15 +261,17 @@ export default function RegisterPage() {
               htmlFor="phone"
               className="block text-sm font-medium text-gray-700"
             >
-              Телефон
+              Телефон<span className="ml-1 text-red-500">*</span>
             </label>
             <input
               id="phone"
               name="phone"
               type="tel"
+              required
               value={formData.phone}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="tel"
             />
           </div>
           <div>
@@ -237,6 +288,7 @@ export default function RegisterPage() {
               value={formData.website}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="url"
             />
           </div>
           <div>
@@ -253,6 +305,7 @@ export default function RegisterPage() {
               value={formData.logo_url}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="off"
             />
           </div>
           <div className="md:col-span-2">
@@ -260,12 +313,13 @@ export default function RegisterPage() {
               htmlFor="description"
               className="block text-sm font-medium text-gray-700"
             >
-              Описание компании
+              Описание компании<span className="ml-1 text-red-500">*</span>
             </label>
             <textarea
               id="description"
               name="description"
               rows={3}
+              required
               value={formData.description}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -273,7 +327,9 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <p className="md:col-span-2 text-sm text-red-600">{error}</p>
+            <p className="md:col-span-2 text-sm text-red-600 text-center bg-red-100 p-3 rounded-md">
+              {error}
+            </p>
           )}
 
           <div className="md:col-span-2">

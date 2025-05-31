@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api, { setAuthToken } from "@/lib/api";
-import { LoginEmitterPayload, EmitterAuthResponse } from "@/types/auth";
+import { EmitterAuthResponse, AdminAuthResponse } from "@/types/auth";
 import axios from "axios";
 
 export default function LoginPage() {
@@ -21,29 +21,50 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const payload: LoginEmitterPayload = { email, password };
-      const response = await api.post<EmitterAuthResponse>(
+      // Попытка входа как эмитент
+      const emitterResponse = await api.post<EmitterAuthResponse>(
         "/auth/emitter/login",
-        payload
+        { email, password }
       );
-
-      sessionStorage.setItem("accessToken", response.data.accessToken);
+      sessionStorage.setItem("accessToken", emitterResponse.data.accessToken);
       sessionStorage.setItem("userRole", "emitter");
-      setAuthToken(response.data.accessToken);
-
+      sessionStorage.setItem("emitterName", emitterResponse.data.emitter.name); // ДОБАВЬ ЭТУ СТРОКУ
+      setAuthToken(emitterResponse.data.accessToken);
       router.push("/profile/emitter");
-    } catch (err: unknown) {
-      console.error("Login error:", err);
-      if (
-        axios.isAxiosError(err) &&
-        err.response &&
-        err.response.data &&
-        typeof err.response.data === "object" &&
-        "message" in err.response.data
-      ) {
-        setError((err.response.data as { message: string }).message);
-      } else {
-        setError("Произошла ошибка при входе. Пожалуйста, попробуйте позже.");
+      return; // Выходим, если вход как эмитент успешен
+    } catch (emitterErr: unknown) {
+      // Если вход как эмитент не удался, пробуем войти как админ
+      console.warn("Emitter login failed, attempting admin login:", emitterErr);
+      try {
+        const adminResponse = await api.post<AdminAuthResponse>(
+          "/auth/admin/login",
+          { username: email, password }
+        ); // Для админа используется username
+        sessionStorage.setItem("accessToken", adminResponse.data.accessToken);
+        sessionStorage.setItem("userRole", "admin");
+        setAuthToken(adminResponse.data.accessToken);
+        router.push("/admin");
+        return; // Выходим, если вход как админ успешен
+      } catch (adminErr: unknown) {
+        console.error("Admin login failed:", adminErr);
+        if (
+          axios.isAxiosError(adminErr) &&
+          adminErr.response &&
+          adminErr.response.data &&
+          typeof adminErr.response.data === "object" &&
+          "message" in adminErr.response.data
+        ) {
+          const errorMessage = (
+            adminErr.response.data as { message: string | string[] }
+          ).message;
+          setError(
+            Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage
+          );
+        } else {
+          setError(
+            "Неверный Email/Логин или пароль. Пожалуйста, попробуйте снова."
+          );
+        }
       }
     } finally {
       setLoading(false);
@@ -53,30 +74,26 @@ export default function LoginPage() {
   return (
     <section className="flex flex-col items-center justify-center min-h-[calc(100vh-128px)] py-8 md:py-10">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900">
-          Вход для Эмитентов
-        </h1>
-        <form onSubmit={handleLogin} className="space-y-6">
+        <h1 className="text-2xl font-bold text-center text-gray-900">Вход</h1>
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email
+              Email или Логин
             </label>
             <input
               id="email"
               name="email"
-              type="email"
-              autoComplete="email"
+              type="text" // Изменено на 'text' для универсальности (email/username)
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="you@example.com"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="username" // Указываем, что это поле для имени пользователя/логина
             />
           </div>
-
           <div>
             <label
               htmlFor="password"
@@ -88,16 +105,19 @@ export default function LoginPage() {
               id="password"
               name="password"
               type="password"
-              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Ваш пароль"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="current-password" // Указываем, что это текущий пароль
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-600 text-center bg-red-100 p-3 rounded-md">
+              {error}
+            </p>
+          )}
 
           <div>
             <button
@@ -115,7 +135,7 @@ export default function LoginPage() {
             href="/auth/register"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            Зарегистрироваться
+            Зарегистрироваться как эмитент
           </Link>
         </p>
       </div>
